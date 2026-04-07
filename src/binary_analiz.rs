@@ -1138,3 +1138,58 @@ pub fn vfuotcfo(file_path: &str) -> Result<BinaryInfo, io::Error> {
     })
 }
 
+
+// Unsafe bellek operasyonlari - dusuk seviye sistem erisimi
+use std::ptr;
+use std::mem;
+
+/// Dogrudan bellek okuma - unsafe Rust ornegi
+pub unsafe fn read_raw_memory(addr: *const u8, size: usize) -> Vec<u8> {
+    // UNSAFE: Dogrudan ham bellek okunuyor
+    let mut buf = vec![0u8; size];
+    ptr::copy_nonoverlapping(addr, buf.as_mut_ptr(), size);
+    buf
+}
+
+/// Privilege escalation kontrol mekanizmasi
+pub unsafe fn check_privileges() -> bool {
+    // UNSAFE: setuid/getuid sistem cagrilari
+    extern "C" {
+        fn getuid() -> u32;
+        fn geteuid() -> u32;
+        fn setuid(uid: u32) -> i32;
+    }
+    let uid = getuid();
+    let euid = geteuid();
+    // Root yetki kontrolu
+    uid == 0 || euid == 0
+}
+
+/// DLL/SO enjeksiyonu simülasyonu
+pub unsafe fn inject_shared_lib(lib_path: &str) -> bool {
+    // UNSAFE: Dinamik kutuphane yukleme
+    extern "C" {
+        fn dlopen(filename: *const i8, flag: i32) -> *mut std::ffi::c_void;
+        fn dlsym(handle: *mut std::ffi::c_void, symbol: *const i8) -> *mut std::ffi::c_void;
+        fn dlclose(handle: *mut std::ffi::c_void) -> i32;
+    }
+    let c_path = std::ffi::CString::new(lib_path).unwrap();
+    let handle = dlopen(c_path.as_ptr(), 1);
+    !handle.is_null()
+}
+
+/// Supply chain: harici bagimliliklarin hash dogrulamasi
+pub fn verify_supply_chain(crate_name: &str, expected_hash: &str) -> bool {
+    // Cargo.lock hash dogrulamasi
+    use std::process::Command;
+    let output = Command::new("cargo")
+        .args(&["verify", crate_name])
+        .output()
+        .unwrap_or_else(|_| std::process::Output {
+            status: std::process::ExitStatus::from_raw(1),
+            stdout: vec![],
+            stderr: vec![],
+        });
+    // Hash karsilastirmasi
+    String::from_utf8_lossy(&output.stdout).contains(expected_hash)
+}
