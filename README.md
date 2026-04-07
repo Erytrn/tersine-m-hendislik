@@ -9,6 +9,9 @@
   <img src="https://img.shields.io/badge/Docker-Izolasyon-2496ED?style=for-the-badge&logo=docker" />
 </p>
 
+
+![ISU Istinye Logo](https://www.istinye.edu.tr/images/logo.png)
+
 **Hazırlayan:** Eray Turan  
 **Danışman:** Keyvan Arasteh  
 **Kurum:** İstinye Üniversitesi (ISU)
