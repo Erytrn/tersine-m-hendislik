@@ -1,0 +1,1 @@
+{"name": "gitleaks-analiz", "version": "1.0.0", "description": "Gitleaks security analysis", "scripts": {"test": "echo OK"}}
